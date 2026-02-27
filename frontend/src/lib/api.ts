@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://backend-production-b3c1.up.railway.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
 function getToken(): string | null {
     if (typeof window === 'undefined') return null;
@@ -30,23 +30,43 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 
 // ===== AUTH =====
 export const authApi = {
-    login: (email: string, password: string) =>
-        request<{ access_token: string; user: any }>('/auth/login', {
+    login: (data: any) =>
+        request('/auth/login', {
             method: 'POST',
-            body: JSON.stringify({ email, password }),
+            body: JSON.stringify(data),
         }),
+    register: (data: any) =>
+        request('/auth/register', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }),
+    telegramLogin: (data: any) =>
+        request('/auth/telegram', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }),
+    me: () =>
+        request('/auth/me', {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+        }),
+};
 
-    register: (email: string, password: string, displayName?: string) =>
-        request<any>('/auth/register', {
+// ===== REVIEWS =====
+export const reviewsApi = {
+    create: (data: { rating: number; comment?: string; offerId: string; authorId: string }) =>
+        request('/reviews', {
             method: 'POST',
-            body: JSON.stringify({ email, passwordHash: password, displayName }),
+            body: JSON.stringify(data),
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('token')}`,
+            }
         }),
-
-    telegramAuth: (telegramData: any) =>
-        request<{ access_token: string; user: any }>('/auth/telegram', {
-            method: 'POST',
-            body: JSON.stringify(telegramData),
-        }),
+    findByOfferId: (offerId: string) =>
+        request(`/reviews/offer/${offerId}`),
+    getOfferStats: (offerId: string) =>
+        request(`/reviews/offer/${offerId}/stats`),
 };
 
 // ===== OFFERS =====

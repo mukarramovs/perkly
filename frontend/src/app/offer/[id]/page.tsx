@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { ArrowLeft, ShoppingCart, Shield, Clock, User, Tag } from 'lucide-react';
 import Link from 'next/link';
+import { Reviews } from '@/components/Reviews';
 import { offersApi, transactionsApi } from '@/lib/api';
 import { useCart } from '@/lib/CartContext';
 import { useAuth } from '@/lib/AuthContext';
@@ -196,6 +197,9 @@ export default function OfferDetailPage() {
                     )}
                 </div>
             </div>
+
+            {/* Reviews Section */}
+            <Reviews offerId={offer.id} />
         </div>
     );
 }

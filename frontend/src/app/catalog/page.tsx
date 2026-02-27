@@ -33,11 +33,12 @@ function CatalogContent() {
     const searchParams = useSearchParams();
     const initialCategory = searchParams.get('category') || '';
     const initialFlash = searchParams.get('isFlashDrop') === 'true';
+    const initialSearch = searchParams.get('search') || '';
 
     const [offers, setOffers] = useState<any[]>([]);
     const [total, setTotal] = useState(0);
     const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState('');
+    const [search, setSearch] = useState(initialSearch);
     const [category, setCategory] = useState(initialCategory);
     const [sort, setSort] = useState('newest');
     const [page, setPage] = useState(0);

@@ -19,10 +19,12 @@ function Countdown({ hours }: { hours: number }) {
 
 export default function Home() {
   const categories = [
-    { title: 'Игры и Аккаунты', icon: Gamepad2, count: '1.2k+', from: '#3b82f6', to: '#06b6d4' },
-    { title: 'Подписки', icon: KeyRound, count: '850+', from: '#a855f7', to: '#d946ef' },
-    { title: 'Рестораны и Кафе', icon: Coffee, count: '430+', from: '#f97316', to: '#f59e0b' },
-    { title: 'Маркетплейс', icon: Tag, count: '2.4k+', from: '#ec4899', to: '#f43f5e' },
+    { title: 'Игры и Аккаунты', icon: Gamepad2, count: '1.2k+', from: '#3b82f6', to: '#06b6d4', href: '/catalog?category=GAMES' },
+    { title: 'Подписки', icon: KeyRound, count: '850+', from: '#a855f7', to: '#d946ef', href: '/catalog?category=SUBSCRIPTIONS' },
+    { title: 'Рестораны и Кафе', icon: Coffee, count: '430+', from: '#f97316', to: '#f59e0b', href: '/catalog?category=RESTAURANTS' },
+    { title: 'Маркетплейс', icon: Tag, count: '2.4k+', from: '#ec4899', to: '#f43f5e', href: '/catalog?category=MARKETPLACES' },
+    { title: 'Купоны 🏷️', icon: Tag, count: '320+', from: '#22c55e', to: '#14b8a6', href: '/coupons' },
+    { title: 'Тарифы ✨', icon: Sparkles, count: '3', from: '#fbbf24', to: '#f59e0b', href: '/pricing' },
   ];
 
   const trendingOffers = [
@@ -60,12 +62,12 @@ export default function Home() {
         </p>
 
         <div className="flex gap-4 justify-center flex-wrap">
-          <button className="px-8 py-4 rounded-full bg-white text-black font-semibold text-base flex items-center gap-2 cursor-pointer" style={{ boxShadow: '0 0 30px rgba(255,255,255,0.12)' }}>
+          <Link href="/catalog" className="px-8 py-4 rounded-full bg-white text-black font-semibold text-base flex items-center gap-2 cursor-pointer no-underline" style={{ boxShadow: '0 0 30px rgba(255,255,255,0.12)' }}>
             Начать Покупки <ArrowRight className="w-5 h-5" />
-          </button>
-          <button className="px-8 py-4 rounded-full text-white font-medium text-base cursor-pointer border-0" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}>
+          </Link>
+          <Link href="/sell" className="px-8 py-4 rounded-full text-white font-medium text-base cursor-pointer no-underline" style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}>
             Продать Товар
-          </button>
+          </Link>
         </div>
       </section>
 
@@ -138,15 +140,15 @@ export default function Home() {
       {/* ======== CATEGORIES ======== */}
       <section className="w-full mb-20">
         <h2 className="text-2xl font-bold mb-7 text-white">Категории Товаров</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-none">
           {categories.map((c, i) => (
-            <div key={i} className="glass-card p-6 cursor-pointer">
-              <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5 relative z-10" style={{ background: `linear-gradient(135deg, ${c.from}, ${c.to})`, boxShadow: `0 0 20px ${c.from}30` }}>
-                <c.icon className="w-6 h-6 text-white" />
+            <Link href={c.href} key={i} className="glass-card p-5 cursor-pointer shrink-0 w-[160px] no-underline">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-4 relative z-10" style={{ background: `linear-gradient(135deg, ${c.from}, ${c.to})`, boxShadow: `0 0 20px ${c.from}30` }}>
+                <c.icon className="w-5 h-5 text-white" />
               </div>
-              <h3 className="text-base font-bold text-white mb-1 relative z-10">{c.title}</h3>
-              <p className="text-sm text-white/30 relative z-10">{c.count} предложений</p>
-            </div>
+              <h3 className="text-sm font-bold text-white mb-1 relative z-10">{c.title}</h3>
+              <p className="text-xs text-white/30 relative z-10">{c.count} предложений</p>
+            </Link>
           ))}
         </div>
       </section>

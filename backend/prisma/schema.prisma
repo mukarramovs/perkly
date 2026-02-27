@@ -54,26 +54,31 @@ model User {
   // Relationships
   offersAsSeller     Offer[]       @relation("SellerOffers")
   transactionsAsBuyer Transaction[] @relation("BuyerTransactions")
+  reviewsWritten      Review[]     @relation("AuthorReviews")
 }
 
 // Offer / Product Model
 model Offer {
-  id          String        @id @default(uuid())
-  title       String
-  description String
-  price       Float         @default(0.0) // 0.0 means free
-  category    OfferCategory
-  isExclusive Boolean       @default(false) // If true, only for Gold/Platinum
-  hiddenData  String        // The actual promo code, link, or credentials
-  isActive    Boolean       @default(true)
-  isFlashDrop Boolean       @default(false)
-  expiresAt   DateTime?     // Expiration date for temporary promos
-  sellerId    String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id                String        @id @default(uuid())
+  title             String
+  description       String
+  price             Float         @default(0.0) // 0.0 means free
+  discountPercent   Int?          @default(0)
+  vendorLogo        String?
+  usageInstructions String?
+  category          OfferCategory
+  isExclusive       Boolean       @default(false) // If true, only for Gold/Platinum
+  hiddenData        String        // The actual promo code, link, or credentials
+  isActive          Boolean       @default(true)
+  isFlashDrop       Boolean       @default(false)
+  expiresAt         DateTime?     // Expiration date for temporary promos
+  sellerId          String
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
 
   seller      User          @relation("SellerOffers", fields: [sellerId], references: [id])
   transactions Transaction[]
+  reviews      Review[]
 }
 
 // Transaction (Escrow & Purchase)
@@ -98,4 +103,18 @@ model Subscription {
   startDate DateTime @default(now())
   endDate   DateTime
   isActive  Boolean  @default(true)
+}
+
+// Review Model
+model Review {
+  id        String   @id @default(uuid())
+  rating    Int      @default(5) // 1 to 5
+  comment   String?
+  offerId   String
+  authorId  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  offer  Offer @relation(fields: [offerId], references: [id])
+  author User  @relation("AuthorReviews", fields: [authorId], references: [id])
 }
