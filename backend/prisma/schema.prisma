@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Tier {
+  SILVER
+  GOLD
+  PLATINUM
+}
+
+enum OfferCategory {
+  RESTAURANTS
+  TOURISM
+  MARKETPLACES
+  SUBSCRIPTIONS
+  GAMES
+  COURSES
+  FITNESS
+  OTHER
+}
+
+enum TransactionStatus {
+  PENDING
+  PAID
+  ACTIVATED
+  DISPUTED
+  COMPLETED
+  CANCELLED
+}
+
+// User Model
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  passwordHash  String?
+  displayName   String?
+  avatarUrl     String?
+  role          Role     @default(USER)
+  tier          Tier     @default(SILVER)
+  balance       Float    @default(0.0)
+  rewardPoints  Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relationships
+  offersAsSeller     Offer[]       @relation("SellerOffers")
+  transactionsAsBuyer Transaction[] @relation("BuyerTransactions")
+}
+
+// Offer / Product Model
+model Offer {
+  id          String        @id @default(uuid())
+  title       String
+  description String
+  price       Float         @default(0.0) // 0.0 means free
+  category    OfferCategory
+  isExclusive Boolean       @default(false) // If true, only for Gold/Platinum
+  hiddenData  String        // The actual promo code, link, or credentials
+  isActive    Boolean       @default(true)
+  isFlashDrop Boolean       @default(false)
+  expiresAt   DateTime?     // Expiration date for temporary promos
+  sellerId    String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  seller      User          @relation("SellerOffers", fields: [sellerId], references: [id])
+  transactions Transaction[]
+}
+
+// Transaction (Escrow & Purchase)
+model Transaction {
+  id        String            @id @default(uuid())
+  offerId   String
+  buyerId   String
+  price     Float
+  status    TransactionStatus @default(PENDING)
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  offer     Offer @relation(fields: [offerId], references: [id])
+  buyer     User  @relation("BuyerTransactions", fields: [buyerId], references: [id])
+}
+
+// Subscription / Tier History (Optional)
+model Subscription {
+  id        String   @id @default(uuid())
+  userId    String
+  tier      Tier
+  startDate DateTime @default(now())
+  endDate   DateTime
+  isActive  Boolean  @default(true)
+}

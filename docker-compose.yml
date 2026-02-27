@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: perkly-db
+    restart: always
+    environment:
+      POSTGRES_USER: perkly
+      POSTGRES_PASSWORD: perkly_password
+      POSTGRES_DB: perkly_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - perkly-db-data:/var/lib/postgresql/data
+
+volumes:
+  perkly-db-data:
