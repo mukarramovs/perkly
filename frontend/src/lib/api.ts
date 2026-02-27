@@ -1,4 +1,4 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://postgres-production-eb47.up.railway.app';
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'https://backend-production-b3c1.up.railway.app';
 
 function getToken(): string | null {
     if (typeof window === 'undefined') return null;
