@@ -1,0 +1,31 @@
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import { Providers } from './providers';
+import { Navbar } from '@/components/Navbar';
+
+const inter = Inter({ subsets: ['latin', 'cyrillic'], variable: '--font-inter' });
+
+export const metadata: Metadata = {
+  title: 'Perkly | Премиум Маркетплейс Цифровых Услуг',
+  description: 'Покупка и продажа промокодов, подписок и цифровых товаров с безопасной сделкой.',
+};
+
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="ru" className="dark">
+      <body className={`${inter.variable} font-sans antialiased text-white min-h-screen flex flex-col bg-black`}>
+        <Providers>
+          <Navbar />
+          <main className="flex-1 mt-16">
+            {children}
+          </main>
+        </Providers>
+      </body>
+    </html>
+  );
+}
