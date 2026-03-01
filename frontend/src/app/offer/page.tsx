@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { ArrowLeft, ShoppingCart, Shield, Clock, User, Tag, Pizza, Tv, Gamepad2, GraduationCap, Store, Plane, Dumbbell, Package, Flame, Crown, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Reviews } from '@/components/Reviews';
@@ -25,8 +25,9 @@ const CATEGORY_ICONS: Record<string, any> = {
     MARKETPLACES: Store, TOURISM: Plane, FITNESS: Dumbbell, OTHER: Package,
 };
 
-export default function OfferDetailPage() {
-    const params = useParams();
+function OfferDetailContent() {
+    const searchParams = useSearchParams();
+    const id = searchParams.get('id');
     const router = useRouter();
     const { isAuthenticated, refreshUser } = useAuth();
     const { addItem, isInCart } = useCart();
@@ -38,13 +39,13 @@ export default function OfferDetailPage() {
     const [error, setError] = useState('');
 
     useEffect(() => {
-        if (params.id) {
-            offersApi.getById(params.id as string)
+        if (id) {
+            offersApi.getById(id)
                 .then(setOffer)
                 .catch(() => setOffer(null))
                 .finally(() => setLoading(false));
         }
-    }, [params.id]);
+    }, [id]);
 
     const handleBuy = async () => {
         if (!isAuthenticated) {
@@ -206,5 +207,13 @@ export default function OfferDetailPage() {
             {/* Reviews Section */}
             <Reviews offerId={offer.id} />
         </div>
+    );
+}
+
+export default function OfferDetailPage() {
+    return (
+        <Suspense fallback={<div className="flex justify-center py-20 animate-pulse text-white/50">Загрузка...</div>}>
+            <OfferDetailContent />
+        </Suspense>
     );
 }

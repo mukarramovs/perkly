@@ -56,11 +56,11 @@ export default function ProfilePage() {
         try {
             await api.post('/disputes', { transactionId: txId, reason });
             alert('Спор успешно открыт!');
-            router.push(`/profile/transactions/${txId}/dispute`);
+            router.push(`/profile/transactions/dispute/?id=${txId}`);
         } catch (err: any) {
             // If dispute already exists, just redirect to it
             if (err.response?.status === 400 && err.response?.data?.message === 'Dispute already exists for this transaction') {
-                router.push(`/profile/transactions/${txId}/dispute`);
+                router.push(`/profile/transactions/dispute/?id=${txId}`);
             } else {
                 alert('Ошибка при открытии спора: ' + (err.response?.data?.message || err.message));
             }
@@ -202,7 +202,7 @@ export default function ProfilePage() {
                                         <td className="py-3 px-4 text-xs text-white/30">{new Date(tx.createdAt).toLocaleDateString('ru-RU')}</td>
                                         <td className="py-3 px-4 text-right">
                                             {tx.status === 'DISPUTED' ? (
-                                                <Link href={`/profile/transactions/${tx.id}/dispute`} className="text-xs text-orange-400 hover:text-orange-300 font-medium flex items-center justify-end gap-1">
+                                                <Link href={`/profile/transactions/dispute/?id=${tx.id}`} className="text-xs text-orange-400 hover:text-orange-300 font-medium flex items-center justify-end gap-1">
                                                     Чат спора
                                                 </Link>
                                             ) : (tx.status === 'COMPLETED' || tx.status === 'PAID') && (

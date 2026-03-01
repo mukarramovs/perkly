@@ -107,7 +107,7 @@ export default function Home() {
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
           {flashDrops.length > 0 ? flashDrops.map((d, i) => (
-            <Link href={`/offer/${d.id}`} key={d.id || i} className="flex items-center p-4 cursor-pointer rounded-2xl transition-all duration-300 no-underline" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(249,115,22,0.15)', boxShadow: '0 0 25px rgba(249,115,22,0.06), inset 0 0 30px rgba(249,115,22,0.03)' }}>
+            <Link href={`/offer/?id=${d.id}`} key={d.id || i} className="flex items-center p-4 cursor-pointer rounded-2xl transition-all duration-300 no-underline" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(249,115,22,0.15)', boxShadow: '0 0 25px rgba(249,115,22,0.06), inset 0 0 30px rgba(249,115,22,0.03)' }}>
               <div className="w-20 h-20 rounded-xl overflow-hidden relative shrink-0 mr-5" style={{ boxShadow: '0 0 15px rgba(249,115,22,0.15)', background: '#111' }}>
                 {d.vendorLogo ? (
                   <Image src={d.vendorLogo} fill className="object-cover" alt={d.title} />
@@ -198,7 +198,7 @@ export default function Home() {
             <div className="col-span-1 md:col-span-4 text-center py-10 text-white/50">Загрузка скидок...</div>
           ) : trendingOffers.length > 0 ? (
             trendingOffers.map((o: any, i) => (
-              <Link href={`/offer/${o.id}`} key={o.id || i} className="glass-card cursor-pointer block no-underline">
+              <Link href={`/offer/?id=${o.id}`} key={o.id || i} className="glass-card cursor-pointer block no-underline">
                 <div className="w-full h-44 relative overflow-hidden bg-white/5 flex items-center justify-center">
                   {o.vendorLogo ? (
                     <Image src={o.vendorLogo} fill className="object-cover transition-transform duration-500 hover:scale-105" alt={o.title} />

@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useAuth } from '@/lib/AuthContext';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Send, AlertTriangle, Shield, CheckCircle, Clock } from 'lucide-react';
 import api from '@/lib/api';
 
-export default function DisputePage({ params }: { params: { id: string } }) {
+function DisputeContent() {
     const { user, isAuthenticated, loading } = useAuth();
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const id = searchParams.get('id');
 
     const [dispute, setDispute] = useState<any>(null);
     const [messages, setMessages] = useState<any[]>([]);
@@ -19,7 +21,7 @@ export default function DisputePage({ params }: { params: { id: string } }) {
 
     const fetchDispute = async () => {
         try {
-            const { data } = await api.get(`/disputes/${params.id}`);
+            const { data } = await api.get(`/disputes/${id}`);
             setDispute(data);
             setMessages(data.messages || []);
         } catch (err) {
@@ -35,13 +37,13 @@ export default function DisputePage({ params }: { params: { id: string } }) {
             return;
         }
 
-        if (isAuthenticated && params.id) {
+        if (isAuthenticated && id) {
             fetchDispute();
             // Simple polling for a "live" feel (in a real app, use WebSockets)
             const interval = setInterval(fetchDispute, 5000);
             return () => clearInterval(interval);
         }
-    }, [isAuthenticated, loading, params.id, router]);
+    }, [isAuthenticated, loading, id, router]);
 
     useEffect(() => {
         // Scroll to bottom when messages update
@@ -54,7 +56,7 @@ export default function DisputePage({ params }: { params: { id: string } }) {
 
         setIsSending(true);
         try {
-            await api.post(`/disputes/${params.id}/messages`, {
+            await api.post(`/disputes/${id}/messages`, {
                 text: newMessage
             });
             setNewMessage('');
@@ -72,7 +74,7 @@ export default function DisputePage({ params }: { params: { id: string } }) {
         }
 
         try {
-            await api.patch(`/disputes/${params.id}/resolve`, { status });
+            await api.patch(`/disputes/${id}/resolve`, { status });
             fetchDispute();
         } catch (err) {
             console.error('Failed to resolve dispute', err);
@@ -109,7 +111,7 @@ export default function DisputePage({ params }: { params: { id: string } }) {
                             <AlertTriangle className="w-6 h-6 text-red-500" />
                             <h1 className="text-2xl font-bold text-white">Спор по заказу #{dispute.transaction.id.substring(0, 8)}</h1>
                             <span className={`px-3 py-1 text-xs font-bold rounded-full ${dispute.status === 'OPEN' ? 'bg-yellow-500/20 text-yellow-500' :
-                                    dispute.status === 'RESOLVED' ? 'bg-green-500/20 text-green-500' : 'bg-gray-500/20 text-gray-400'
+                                dispute.status === 'RESOLVED' ? 'bg-green-500/20 text-green-500' : 'bg-gray-500/20 text-gray-400'
                                 }`}>
                                 {dispute.status}
                             </span>
@@ -166,9 +168,9 @@ export default function DisputePage({ params }: { params: { id: string } }) {
                                         </span>
                                     </div>
                                     <div className={`max-w-[80%] rounded-2xl px-5 py-3 ${isMine ? 'bg-purple-600 text-white rounded-br-sm' :
-                                            isAdmin ? 'bg-red-500/20 border border-red-500/30 text-white rounded-bl-sm' :
-                                                isSeller ? 'bg-white/10 border border-white/5 text-white rounded-bl-sm' :
-                                                    'bg-blue-500/20 border border-blue-500/30 text-white rounded-bl-sm'
+                                        isAdmin ? 'bg-red-500/20 border border-red-500/30 text-white rounded-bl-sm' :
+                                            isSeller ? 'bg-white/10 border border-white/5 text-white rounded-bl-sm' :
+                                                'bg-blue-500/20 border border-blue-500/30 text-white rounded-bl-sm'
                                         }`}>
                                         {msg.text}
                                     </div>
@@ -207,5 +209,13 @@ export default function DisputePage({ params }: { params: { id: string } }) {
                 </div>
             </div>
         </div>
+    );
+}
+
+export default function DisputePage() {
+    return (
+        <Suspense fallback={<div className="flex justify-center items-center min-h-[60vh] animate-spin w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full" />}>
+            <DisputeContent />
+        </Suspense>
     );
 }
