@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, ShoppingCart, Shield, Clock, User, Tag } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Shield, Clock, User, Tag, Pizza, Tv, Gamepad2, GraduationCap, Store, Plane, Dumbbell, Package, Flame, Crown, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import { Reviews } from '@/components/Reviews';
 import { offersApi, transactionsApi } from '@/lib/api';
@@ -10,19 +10,19 @@ import { useCart } from '@/lib/CartContext';
 import { useAuth } from '@/lib/AuthContext';
 
 const CATEGORY_LABELS: Record<string, string> = {
-    RESTAURANTS: '🍕 Рестораны и Кафе',
-    SUBSCRIPTIONS: '📺 Подписки',
-    GAMES: '🎮 Игры',
-    COURSES: '📚 Курсы',
-    MARKETPLACES: '🛒 Маркетплейсы',
-    TOURISM: '✈️ Туризм',
-    FITNESS: '💪 Фитнес',
-    OTHER: '📦 Другое',
+    RESTAURANTS: 'Рестораны и Кафе',
+    SUBSCRIPTIONS: 'Подписки',
+    GAMES: 'Игры',
+    COURSES: 'Курсы',
+    MARKETPLACES: 'Маркетплейсы',
+    TOURISM: 'Туризм',
+    FITNESS: 'Фитнес',
+    OTHER: 'Другое',
 };
 
-const CATEGORY_ICONS: Record<string, string> = {
-    RESTAURANTS: '🍕', SUBSCRIPTIONS: '📺', GAMES: '🎮', COURSES: '📚',
-    MARKETPLACES: '🛒', TOURISM: '✈️', FITNESS: '💪', OTHER: '📦',
+const CATEGORY_ICONS: Record<string, any> = {
+    RESTAURANTS: Pizza, SUBSCRIPTIONS: Tv, GAMES: Gamepad2, COURSES: GraduationCap,
+    MARKETPLACES: Store, TOURISM: Plane, FITNESS: Dumbbell, OTHER: Package,
 };
 
 export default function OfferDetailPage() {
@@ -94,7 +94,12 @@ export default function OfferDetailPage() {
                 {/* Left - Image */}
                 <div className="md:col-span-2">
                     <div className="rounded-2xl overflow-hidden aspect-square flex items-center justify-center" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.15), rgba(59,130,246,0.1))', border: '1px solid rgba(255,255,255,0.06)' }}>
-                        <span className="text-8xl">{CATEGORY_ICONS[offer.category] || '📦'}</span>
+                        <div className="w-24 h-24 text-white/50">
+                            {(() => {
+                                const IconNode = CATEGORY_ICONS[offer.category] || Package;
+                                return <IconNode className="w-full h-full" />;
+                            })()}
+                        </div>
                     </div>
 
                     {/* Seller info */}
@@ -120,12 +125,12 @@ export default function OfferDetailPage() {
                         </span>
                         {offer.isFlashDrop && (
                             <span className="px-3 py-1 rounded-lg text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #f97316, #ef4444)' }}>
-                                🔥 Flash Drop
+                                <Flame className="w-3 h-3 inline-block mr-1" /> Flash Drop
                             </span>
                         )}
                         {offer.isExclusive && (
                             <span className="px-3 py-1 rounded-lg text-xs font-bold text-yellow-300" style={{ background: 'rgba(234,179,8,0.15)', border: '1px solid rgba(234,179,8,0.3)' }}>
-                                👑 Эксклюзив
+                                <Crown className="w-3 h-3 inline-block mr-1" /> Эксклюзив
                             </span>
                         )}
                     </div>
@@ -160,7 +165,7 @@ export default function OfferDetailPage() {
                     {/* Actions */}
                     {purchased ? (
                         <div className="p-4 rounded-xl mb-4" style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.2)' }}>
-                            <p className="text-green-400 font-semibold mb-1">✅ Покупка успешна!</p>
+                            <p className="text-green-400 font-semibold mb-1 flex items-center gap-1.5"><CheckCircle className="w-4 h-4" /> Покупка успешна!</p>
                             <p className="text-green-400/60 text-sm">Промокод доступен в вашем профиле.</p>
                         </div>
                     ) : (

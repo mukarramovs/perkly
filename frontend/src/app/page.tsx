@@ -1,8 +1,9 @@
 'use client';
 
-import { Clock, Gift, Gamepad2, Coffee, KeyRound, Tag, Sparkles, ArrowRight } from 'lucide-react';
+import { Clock, Gift, Gamepad2, Coffee, KeyRound, Tag, Sparkles, ArrowRight, Flame } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import api from '@/lib/api';
 import { useState, useEffect } from 'react';
 
 function Countdown({ hours }: { hours: number }) {
@@ -23,21 +24,44 @@ export default function Home() {
     { title: 'Подписки', icon: KeyRound, count: '850+', from: '#a855f7', to: '#d946ef', href: '/catalog?category=SUBSCRIPTIONS' },
     { title: 'Рестораны и Кафе', icon: Coffee, count: '430+', from: '#f97316', to: '#f59e0b', href: '/catalog?category=RESTAURANTS' },
     { title: 'Маркетплейс', icon: Tag, count: '2.4k+', from: '#ec4899', to: '#f43f5e', href: '/catalog?category=MARKETPLACES' },
-    { title: 'Купоны 🏷️', icon: Tag, count: '320+', from: '#22c55e', to: '#14b8a6', href: '/coupons' },
+    { title: 'Купоны', icon: Tag, count: '320+', from: '#22c55e', to: '#14b8a6', href: '/coupons' },
     { title: 'Тарифы ✨', icon: Sparkles, count: '3', from: '#fbbf24', to: '#f59e0b', href: '/pricing' },
   ];
 
-  const trendingOffers = [
-    { title: 'Netflix Premium 1 Месяц', price: '$4.99', oldPrice: '$19.99', cat: 'Подписки', img: 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?q=80&w=800&auto=format&fit=crop' },
-    { title: 'Dodo Pizza: Большая пицца', price: '$1.50', oldPrice: '$10.00', cat: 'Еда и Напитки', img: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?q=80&w=800&auto=format&fit=crop' },
-    { title: 'Steam GTA V + CS:GO Prime', price: '$15.00', oldPrice: '$35.00', cat: 'Игры', img: 'https://images.unsplash.com/photo-1628102491629-77858ab23612?q=80&w=800&auto=format&fit=crop' },
-    { title: 'Discord Nitro 1 Год', price: '$45.00', oldPrice: '$99.00', cat: 'Подписки', img: 'https://images.unsplash.com/photo-1614680376593-902f74cf0d41?q=80&w=800&auto=format&fit=crop' },
-  ];
+  const [trendingOffers, setTrendingOffers] = useState<any[]>([]);
+  const [flashDrops, setFlashDrops] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const flashDrops = [
-    { title: 'Промокод на Кофе в Safia', price: '0.50$', oldPrice: '2.50$', hours: 2, img: 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?q=80&w=400&auto=format&fit=crop' },
-    { title: 'Yandex Plus 6 месяцев', price: '2.00$', oldPrice: '15.00$', hours: 5, img: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?q=80&w=400&auto=format&fit=crop' },
-  ];
+  useEffect(() => {
+    async function fetchOffers() {
+      try {
+        // Fetch trending (all active offers, limit to 4 for now)
+        const trendingData = await api.offers.list({ take: 4, sort: 'newest' });
+
+        // Fetch flash drops
+        const flashData = await api.offers.list({ isFlashDrop: true });
+
+        setTrendingOffers(trendingData.data || []);
+
+        // Process flash drops to calculate remaining hours
+        const processedFlashDrops = (flashData.data || []).map((drop: any) => {
+          let hours = 0;
+          if (drop.expiresAt) {
+            const diff = new Date(drop.expiresAt).getTime() - new Date().getTime();
+            hours = Math.max(0, diff / (1000 * 60 * 60)); // convert ms to hours
+          }
+          return { ...drop, hours };
+        }).filter((d: any) => d.hours > 0);
+
+        setFlashDrops(processedFlashDrops);
+      } catch (error) {
+        console.error('Failed to fetch offers:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchOffers();
+  }, []);
 
   return (
     <div className="flex flex-col items-center px-6 pb-24 max-w-[1200px] mx-auto w-full">
@@ -78,20 +102,24 @@ export default function Home() {
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] rounded-full pointer-events-none" style={{ background: 'radial-gradient(circle, rgba(249,115,22,0.12), rgba(239,68,68,0.06) 50%, transparent 70%)', filter: 'blur(60px)' }} />
 
         <div className="flex justify-between items-center mb-7 relative z-10">
-          <h2 className="text-2xl font-bold text-gradient-fire">Временные Акции 🔥</h2>
+          <h2 className="text-2xl font-bold text-gradient-fire flex items-center gap-2">Временные Акции <Flame className="w-6 h-6 text-orange-500" /></h2>
           <span className="text-sm text-white/30">Исчезнут совсем скоро</span>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5 relative z-10">
-          {flashDrops.map((d, i) => (
-            <div key={i} className="flex items-center p-4 cursor-pointer rounded-2xl transition-all duration-300" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(249,115,22,0.15)', boxShadow: '0 0 25px rgba(249,115,22,0.06), inset 0 0 30px rgba(249,115,22,0.03)' }}>
-              <div className="w-20 h-20 rounded-xl overflow-hidden relative shrink-0 mr-5" style={{ boxShadow: '0 0 15px rgba(249,115,22,0.15)' }}>
-                <Image src={d.img} fill className="object-cover" alt={d.title} />
+          {flashDrops.length > 0 ? flashDrops.map((d, i) => (
+            <Link href={`/offer/${d.id}`} key={d.id || i} className="flex items-center p-4 cursor-pointer rounded-2xl transition-all duration-300 no-underline" style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(249,115,22,0.15)', boxShadow: '0 0 25px rgba(249,115,22,0.06), inset 0 0 30px rgba(249,115,22,0.03)' }}>
+              <div className="w-20 h-20 rounded-xl overflow-hidden relative shrink-0 mr-5" style={{ boxShadow: '0 0 15px rgba(249,115,22,0.15)', background: '#111' }}>
+                {d.vendorLogo ? (
+                  <Image src={d.vendorLogo} fill className="object-cover" alt={d.title} />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-2xl"><Flame className="w-8 h-8 text-orange-500" /></div>
+                )}
               </div>
               <div className="flex-1 relative z-10">
-                <h3 className="text-base font-bold text-white mb-1">{d.title}</h3>
+                <h3 className="text-base font-bold text-white mb-1 line-clamp-1">{d.title}</h3>
                 <div className="flex items-baseline gap-2 mb-2">
-                  <span className="text-xl font-extrabold text-white">{d.price}</span>
-                  <span className="text-sm text-white/25 line-through">{d.oldPrice}</span>
+                  <span className="text-xl font-extrabold text-white">${d.price}</span>
+                  {d.discountPercent > 0 && <span className="text-sm text-white/25 line-through">${(d.price / (1 - d.discountPercent / 100)).toFixed(2)}</span>}
                 </div>
                 <div className="inline-flex items-center gap-1.5 text-xs text-red-400 font-mono px-2.5 py-1 rounded-full" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', boxShadow: '0 0 10px rgba(239,68,68,0.08)' }}>
                   <Clock className="w-3.5 h-3.5" />
@@ -101,8 +129,10 @@ export default function Home() {
               <button className="px-5 py-2.5 rounded-xl text-white font-bold text-sm cursor-pointer border-0 ml-2 whitespace-nowrap relative z-10" style={{ background: 'linear-gradient(135deg, #f97316, #ef4444)', boxShadow: '0 0 25px rgba(249,115,22,0.35), 0 0 50px rgba(239,68,68,0.15)' }}>
                 Забрать
               </button>
-            </div>
-          ))}
+            </Link>
+          )) : (
+            <div className="col-span-1 md:col-span-2 text-center text-white/50 py-10">Временных акций пока нет, заходите позже!</div>
+          )}
         </div>
       </section>
 
@@ -113,7 +143,9 @@ export default function Home() {
 
           <div className="z-10 max-w-md">
             <div className="inline-flex items-center gap-2 text-purple-300 font-semibold text-sm mb-4 px-3 py-1.5 rounded-full" style={{ background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.15)' }}>
-              <Gift className="w-4 h-4" /> Испытайте Удачу
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
+                <path d="M9.375 3a1.875 1.875 0 0 0 0 3.75h1.875v4.5H3.375A1.875 1.875 0 0 1 1.5 9.375v-.75c0-1.036.84-1.875 1.875-1.875h3.193A3.375 3.375 0 0 1 12 2.753a3.375 3.375 0 0 1 5.432 3.997h3.193c1.035 0 1.875.84 1.875 1.875v.75c0 1.036-.84 1.875-1.875 1.875H12.75v-4.5h1.875a1.875 1.875 0 1 0-1.875-1.875V6.75h-1.5V4.875C11.25 3.839 10.41 3 9.375 3ZM11.25 12.75H3v6.75a2.25 2.25 0 0 0 2.25 2.25h6v-9ZM12.75 12.75v9h6.75a2.25 2.25 0 0 0 2.25-2.25v-6.75h-9Z" />
+              </svg> Испытайте Удачу
             </div>
             <h2 className="text-3xl md:text-4xl font-extrabold mb-4 leading-tight">
               Колесо Фортуны<br /><span className="text-purple-400">Perkly Points</span>
@@ -162,28 +194,40 @@ export default function Home() {
           </button>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {trendingOffers.map((o, i) => (
-            <div key={i} className="glass-card cursor-pointer">
-              <div className="w-full h-44 relative overflow-hidden">
-                <Image src={o.img} fill className="object-cover transition-transform duration-500 hover:scale-105" alt={o.title} />
-                <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold text-white z-10" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)' }}>
-                  {o.cat}
-                </div>
-              </div>
-              <div className="p-5 relative z-10">
-                <h3 className="text-base font-bold text-white mb-3 leading-snug">{o.title}</h3>
-                <div className="flex justify-between items-center">
-                  <div>
-                    <div className="text-xs text-white/25 line-through">{o.oldPrice}</div>
-                    <div className="text-lg font-extrabold text-gradient-green">{o.price}</div>
+          {loading ? (
+            <div className="col-span-1 md:col-span-4 text-center py-10 text-white/50">Загрузка скидок...</div>
+          ) : trendingOffers.length > 0 ? (
+            trendingOffers.map((o: any, i) => (
+              <Link href={`/offer/${o.id}`} key={o.id || i} className="glass-card cursor-pointer block no-underline">
+                <div className="w-full h-44 relative overflow-hidden bg-white/5 flex items-center justify-center">
+                  {o.vendorLogo ? (
+                    <Image src={o.vendorLogo} fill className="object-cover transition-transform duration-500 hover:scale-105" alt={o.title} />
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-16 h-16 text-white/20">
+                      <path d="M9.375 3a1.875 1.875 0 0 0 0 3.75h1.875v4.5H3.375A1.875 1.875 0 0 1 1.5 9.375v-.75c0-1.036.84-1.875 1.875-1.875h3.193A3.375 3.375 0 0 1 12 2.753a3.375 3.375 0 0 1 5.432 3.997h3.193c1.035 0 1.875.84 1.875 1.875v.75c0 1.036-.84 1.875-1.875 1.875H12.75v-4.5h1.875a1.875 1.875 0 1 0-1.875-1.875V6.75h-1.5V4.875C11.25 3.839 10.41 3 9.375 3ZM11.25 12.75H3v6.75a2.25 2.25 0 0 0 2.25 2.25h6v-9ZM12.75 12.75v9h6.75a2.25 2.25 0 0 0 2.25-2.25v-6.75h-9Z" />
+                    </svg>
+                  )}
+                  <div className="absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-semibold text-white z-10" style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)' }}>
+                    {o.category}
                   </div>
-                  <button className="px-4 py-2 rounded-xl text-white font-semibold text-sm cursor-pointer border-0" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
-                    Купить
-                  </button>
                 </div>
-              </div>
-            </div>
-          ))}
+                <div className="p-5 relative z-10">
+                  <h3 className="text-base font-bold text-white mb-3 leading-snug line-clamp-2" title={o.title}>{o.title}</h3>
+                  <div className="flex justify-between items-center">
+                    <div>
+                      {o.discountPercent > 0 && <div className="text-xs text-white/25 line-through">${(o.price / (1 - o.discountPercent / 100)).toFixed(2)}</div>}
+                      <div className="text-lg font-extrabold text-gradient-green">${o.price}</div>
+                    </div>
+                    <button className="px-4 py-2 rounded-xl text-white font-semibold text-sm cursor-pointer border-0" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      Купить
+                    </button>
+                  </div>
+                </div>
+              </Link>
+            ))
+          ) : (
+            <div className="col-span-1 sm:col-span-2 lg:col-span-4 text-center py-10 text-white/50">Новых предложений пока нет</div>
+          )}
         </div>
       </section>
     </div>

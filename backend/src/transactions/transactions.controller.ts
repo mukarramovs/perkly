@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Patch, Param, Body, Query, UseGuards, Request } from '@nestjs/common';
 import { TransactionsService } from './transactions.service';
 import { AuthGuard } from '@nestjs/passport';
-import { TransactionStatus } from '@prisma/client';
+import { TransactionStatus } from '../common/enums';
 
 @Controller('transactions')
 export class TransactionsController {

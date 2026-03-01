@@ -30,4 +30,20 @@ export class AuthController {
         const user = await this.authService.validateOrCreateTelegramUser(telegramData);
         return this.authService.login(user);
     }
+
+    @Post('telegram-miniapp')
+    async telegramMiniAppAuth(@Body() body: { initData: string }) {
+        if (!body.initData) {
+            throw new UnauthorizedException('Missing initData');
+        }
+
+        const telegramData = this.authService.validateTelegramMiniAppHash(body.initData);
+        if (!telegramData) {
+            throw new UnauthorizedException('Invalid Telegram WebApp signature');
+        }
+
+        // telegramData is the parsed JSON of the user from initData
+        const user = await this.authService.validateOrCreateTelegramUser(telegramData);
+        return this.authService.login(user);
+    }
 }

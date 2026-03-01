@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { User, Crown, Coins, ShoppingBag, Settings, LogOut, Edit2, Check, X } from 'lucide-react';
+import { User, Crown, Coins, ShoppingBag, Settings, LogOut, Edit2, Check, X, AlertTriangle, ClipboardList } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { usersApi, transactionsApi } from '@/lib/api';
+import api from '@/lib/api';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
@@ -14,7 +15,7 @@ const TIER_COLORS: Record<string, { bg: string; text: string; glow: string }> = 
 };
 
 export default function ProfilePage() {
-    const { user, isAuthenticated, isLoading, logout, refreshUser } = useAuth();
+    const { user, isAuthenticated, loading, logout, refreshUser } = useAuth();
     const router = useRouter();
 
     const [stats, setStats] = useState({ totalSpent: 0, totalPurchases: 0 });
@@ -25,10 +26,10 @@ export default function ProfilePage() {
     const [activeTab, setActiveTab] = useState<'history' | 'settings'>('history');
 
     useEffect(() => {
-        if (!isLoading && !isAuthenticated) {
+        if (!loading && !isAuthenticated) {
             router.push('/login');
         }
-    }, [isLoading, isAuthenticated, router]);
+    }, [loading, isAuthenticated, router]);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -48,7 +49,25 @@ export default function ProfilePage() {
         } catch { }
     };
 
-    if (isLoading || !user) {
+    const handleOpenDispute = async (txId: string) => {
+        const reason = prompt('Пожалуйста, опишите причину спора (товар не работает, неверные данные и т.д.):');
+        if (!reason) return;
+
+        try {
+            await api.post('/disputes', { transactionId: txId, reason });
+            alert('Спор успешно открыт!');
+            router.push(`/profile/transactions/${txId}/dispute`);
+        } catch (err: any) {
+            // If dispute already exists, just redirect to it
+            if (err.response?.status === 400 && err.response?.data?.message === 'Dispute already exists for this transaction') {
+                router.push(`/profile/transactions/${txId}/dispute`);
+            } else {
+                alert('Ошибка при открытии спора: ' + (err.response?.data?.message || err.message));
+            }
+        }
+    };
+
+    if (loading || !user) {
         return (
             <div className="max-w-4xl mx-auto px-6 py-12">
                 <div className="h-40 rounded-2xl animate-pulse mb-8" style={{ background: 'rgba(255,255,255,0.03)' }} />
@@ -126,14 +145,14 @@ export default function ProfilePage() {
                     className={`flex-1 py-3 rounded-lg text-sm font-semibold cursor-pointer border-0 transition-all ${activeTab === 'history' ? 'text-white' : 'text-white/40'}`}
                     style={{ background: activeTab === 'history' ? 'rgba(168,85,247,0.15)' : 'transparent' }}
                 >
-                    📋 История покупок
+                    <span className="flex items-center justify-center gap-1.5"><ClipboardList className="w-4 h-4" /> История покупок</span>
                 </button>
                 <button
                     onClick={() => setActiveTab('settings')}
                     className={`flex-1 py-3 rounded-lg text-sm font-semibold cursor-pointer border-0 transition-all ${activeTab === 'settings' ? 'text-white' : 'text-white/40'}`}
                     style={{ background: activeTab === 'settings' ? 'rgba(168,85,247,0.15)' : 'transparent' }}
                 >
-                    ⚙️ Настройки
+                    <span className="flex items-center justify-center gap-1.5"><Settings className="w-4 h-4" /> Настройки</span>
                 </button>
             </div>
 
@@ -154,6 +173,7 @@ export default function ProfilePage() {
                                     <th className="text-left text-xs text-white/30 uppercase font-semibold py-3 px-4">Сумма</th>
                                     <th className="text-left text-xs text-white/30 uppercase font-semibold py-3 px-4">Статус</th>
                                     <th className="text-left text-xs text-white/30 uppercase font-semibold py-3 px-4">Дата</th>
+                                    <th className="text-right text-xs text-white/30 uppercase font-semibold py-3 px-4">Действия</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -166,18 +186,31 @@ export default function ProfilePage() {
                                         <td className="py-3 px-4 text-sm font-semibold text-white">{tx.price.toFixed(2)}$</td>
                                         <td className="py-3 px-4">
                                             <span className={`text-xs font-semibold px-2 py-1 rounded-md ${tx.status === 'COMPLETED' || tx.status === 'PAID' ? 'text-green-400' :
-                                                    tx.status === 'PENDING' ? 'text-yellow-400' :
+                                                tx.status === 'PENDING' ? 'text-yellow-400' :
+                                                    tx.status === 'DISPUTED' ? 'text-orange-400' :
                                                         tx.status === 'CANCELLED' ? 'text-red-400' : 'text-white/50'
                                                 }`} style={{
                                                     background: tx.status === 'COMPLETED' || tx.status === 'PAID' ? 'rgba(34,197,94,0.1)' :
                                                         tx.status === 'PENDING' ? 'rgba(234,179,8,0.1)' :
-                                                            tx.status === 'CANCELLED' ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.05)',
+                                                            tx.status === 'DISPUTED' ? 'rgba(249,115,22,0.1)' :
+                                                                tx.status === 'CANCELLED' ? 'rgba(239,68,68,0.1)' : 'rgba(255,255,255,0.05)',
                                                 }}>
                                                 {tx.status === 'PAID' ? 'Оплачено' : tx.status === 'COMPLETED' ? 'Завершено' :
-                                                    tx.status === 'PENDING' ? 'Ожидание' : tx.status === 'CANCELLED' ? 'Отменено' : tx.status}
+                                                    tx.status === 'PENDING' ? 'Ожидание' : tx.status === 'DISPUTED' ? 'Спор' : tx.status === 'CANCELLED' ? 'Отменено' : tx.status}
                                             </span>
                                         </td>
                                         <td className="py-3 px-4 text-xs text-white/30">{new Date(tx.createdAt).toLocaleDateString('ru-RU')}</td>
+                                        <td className="py-3 px-4 text-right">
+                                            {tx.status === 'DISPUTED' ? (
+                                                <Link href={`/profile/transactions/${tx.id}/dispute`} className="text-xs text-orange-400 hover:text-orange-300 font-medium flex items-center justify-end gap-1">
+                                                    Чат спора
+                                                </Link>
+                                            ) : (tx.status === 'COMPLETED' || tx.status === 'PAID') && (
+                                                <button onClick={() => handleOpenDispute(tx.id)} className="text-xs text-gray-400 hover:text-red-400 font-medium flex items-center justify-end gap-1 bg-transparent border-0 cursor-pointer ml-auto">
+                                                    <AlertTriangle className="w-3 h-3" /> Проблема?
+                                                </button>
+                                            )}
+                                        </td>
                                     </tr>
                                 ))}
                             </tbody>

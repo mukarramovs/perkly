@@ -1,11 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingCart, User, LogOut, Search, X } from 'lucide-react';
+import { ShoppingCart, User, LogOut, Search, X, Tag, Gem, Medal } from 'lucide-react';
 import { useAuth } from '@/lib/AuthContext';
 import { useCart } from '@/lib/CartContext';
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTelegram } from '@/hooks/useTelegram';
 
 export function Navbar() {
     const { user, isAuthenticated, logout } = useAuth();
@@ -14,6 +15,7 @@ export function Navbar() {
     const [query, setQuery] = useState('');
     const searchRef = useRef<HTMLInputElement>(null);
     const router = useRouter();
+    const { isTMA } = useTelegram();
 
     useEffect(() => {
         if (searchOpen && searchRef.current) searchRef.current.focus();
@@ -29,13 +31,13 @@ export function Navbar() {
     };
 
     const tierBadge = user?.tier === 'PLATINUM'
-        ? { label: '💎', bg: 'linear-gradient(135deg, #a855f7, #d946ef)', shadow: '0 0 10px rgba(168,85,247,0.4)' }
+        ? { icon: Gem, bg: 'linear-gradient(135deg, #a855f7, #d946ef)', shadow: '0 0 10px rgba(168,85,247,0.4)', color: '#fff' }
         : user?.tier === 'GOLD'
-            ? { label: '🥇', bg: 'linear-gradient(135deg, #fbbf24, #f59e0b)', shadow: '0 0 10px rgba(251,191,36,0.4)' }
+            ? { icon: Medal, bg: 'linear-gradient(135deg, #fbbf24, #f59e0b)', shadow: '0 0 10px rgba(251,191,36,0.4)', color: '#fff' }
             : null;
 
     return (
-        <nav className="fixed top-0 w-full z-50 glass px-6 py-3 flex items-center justify-between">
+        <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-7xl z-50 liquid-glass-nav px-6 py-3 rounded-[2rem] flex items-center justify-between transition-all duration-300">
             <Link href="/" className="flex items-center gap-2 no-underline shrink-0">
                 <div className="w-8 h-8 rounded-full" style={{ background: 'linear-gradient(135deg, #a855f7, #ec4899)', boxShadow: '0 0 15px rgba(168,85,247,0.5)' }} />
                 <span className="text-xl font-bold tracking-tight text-white">Perkly</span>
@@ -60,10 +62,15 @@ export function Navbar() {
             {/* Nav Links */}
             <div className="hidden lg:flex items-center gap-5 text-sm font-medium text-white/50 shrink-0">
                 <Link href="/catalog" className="hover:text-white transition-colors no-underline text-inherit">Каталог</Link>
-                <Link href="/coupons" className="hover:text-white transition-colors no-underline text-inherit">Купоны 🏷️</Link>
+                <Link href="/coupons" className="hover:text-white transition-colors no-underline text-inherit flex items-center gap-1.5"><Tag className="w-4 h-4" /> Купоны</Link>
                 <Link href="/pricing" className="hover:text-white transition-colors no-underline text-inherit">Тарифы ✨</Link>
                 <Link href="/sell" className="hover:text-white transition-colors no-underline text-inherit">Продавать</Link>
-                <Link href="/wheel" className="hover:text-white transition-colors no-underline text-inherit">🎁</Link>
+                <Link href="/wheel" className="hover:text-white transition-colors no-underline text-inherit flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-purple-400 drop-shadow-[0_0_8px_rgba(168,85,247,0.5)]">
+                        <path d="M9.375 3a1.875 1.875 0 0 0 0 3.75h1.875v4.5H3.375A1.875 1.875 0 0 1 1.5 9.375v-.75c0-1.036.84-1.875 1.875-1.875h3.193A3.375 3.375 0 0 1 12 2.753a3.375 3.375 0 0 1 5.432 3.997h3.193c1.035 0 1.875.84 1.875 1.875v.75c0 1.036-.84 1.875-1.875 1.875H12.75v-4.5h1.875a1.875 1.875 0 1 0-1.875-1.875V6.75h-1.5V4.875C11.25 3.839 10.41 3 9.375 3ZM11.25 12.75H3v6.75a2.25 2.25 0 0 0 2.25 2.25h6v-9ZM12.75 12.75v9h6.75a2.25 2.25 0 0 0 2.25-2.25v-6.75h-9Z" />
+                    </svg>
+                    Фортуна
+                </Link>
             </div>
 
             <div className="flex items-center gap-2 shrink-0 ml-4">
@@ -88,7 +95,13 @@ export function Navbar() {
                             <User className="w-4 h-4" />
                             <span className="hidden sm:inline">{user?.displayName || 'Профиль'}</span>
                             {tierBadge && (
-                                <span className="text-xs" title={user?.tier || ''}>{tierBadge.label}</span>
+                                <tierBadge.icon
+                                    className="w-3.5 h-3.5 ml-1"
+                                    style={{
+                                        filter: `drop-shadow(${tierBadge.shadow})`,
+                                        color: tierBadge.color
+                                    }}
+                                />
                             )}
                         </Link>
                         <button onClick={logout} className="p-2 rounded-full hover:bg-white/5 transition cursor-pointer bg-transparent border-0">

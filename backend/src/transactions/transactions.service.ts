@@ -1,10 +1,17 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Transaction, TransactionStatus } from '@prisma/client';
+import { BotService } from '../bot/bot.service';
+import { Transaction } from '@prisma/client';
+import { TransactionStatus } from '../common/enums';
 
 @Injectable()
 export class TransactionsService {
-    constructor(private prisma: PrismaService) { }
+    private readonly logger = new Logger(TransactionsService.name);
+
+    constructor(
+        private prisma: PrismaService,
+        private botService: BotService
+    ) { }
 
     async purchase(buyerId: string, offerId: string): Promise<Transaction> {
         // Find offer
@@ -58,6 +65,12 @@ export class TransactionsService {
             });
         });
 
+        // Try to notify the buyer via Telegram
+        if (buyer.telegramId) {
+            const message = `🎉 *Покупка успешна!*\n\nВы приобрели "${offer.title}" за $${offer.price}.\nВаш кэшбек: ${Math.floor(offer.price)} баллов.\n\n_Перейдите в приложение, чтобы забрать товар._`;
+            await this.botService.sendTelegramNotification(buyer.telegramId, message);
+        }
+
         return transaction;
     }
 
@@ -89,9 +102,18 @@ export class TransactionsService {
     }
 
     async updateStatus(id: string, status: TransactionStatus): Promise<Transaction> {
-        return this.prisma.transaction.update({
+        const transaction = await this.prisma.transaction.update({
             where: { id },
             data: { status },
+            include: { offer: true, buyer: true }
         });
+
+        // Try to notify the buyer via Telegram about status changes
+        if (transaction.buyer.telegramId && status === TransactionStatus.CANCELLED) {
+            const message = `❌ *Заказ отменен*\n\nТранзакция по "${transaction.offer.title}" была отменена. Средства за нее возвращены на ваш баланс.`;
+            await this.botService.sendTelegramNotification(transaction.buyer.telegramId, message);
+        }
+
+        return transaction;
     }
 }

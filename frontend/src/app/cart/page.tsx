@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Trash2, ShoppingCart, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Trash2, ShoppingCart, ArrowLeft, ArrowRight, CheckCircle, Pizza, Tv, Gamepad2, Package } from 'lucide-react';
 import Link from 'next/link';
 import { useCart } from '@/lib/CartContext';
 import { useAuth } from '@/lib/AuthContext';
@@ -64,7 +64,7 @@ export default function CartPage() {
                         <div key={i} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
                             <span className="text-sm text-white">{r.title}</span>
                             {r.success ? (
-                                <span className="text-sm text-green-400 font-semibold">✅ Куплено</span>
+                                <span className="text-sm text-green-400 font-semibold flex items-center gap-1.5"><CheckCircle className="w-4 h-4" /> Куплено</span>
                             ) : (
                                 <span className="text-sm text-red-400">{r.error}</span>
                             )}
@@ -95,10 +95,10 @@ export default function CartPage() {
                                 style={{ background: 'rgba(255,255,255,0.02)', borderBottom: i < items.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}
                             >
                                 <div className="flex items-center gap-4">
-                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl" style={{ background: 'rgba(168,85,247,0.1)' }}>
-                                        {item.category === 'RESTAURANTS' ? '🍕' :
-                                            item.category === 'SUBSCRIPTIONS' ? '📺' :
-                                                item.category === 'GAMES' ? '🎮' : '📦'}
+                                    <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white/50" style={{ background: 'rgba(168,85,247,0.1)' }}>
+                                        {item.category === 'RESTAURANTS' ? <Pizza className="w-6 h-6" /> :
+                                            item.category === 'SUBSCRIPTIONS' ? <Tv className="w-6 h-6" /> :
+                                                item.category === 'GAMES' ? <Gamepad2 className="w-6 h-6" /> : <Package className="w-6 h-6" />}
                                     </div>
                                     <div>
                                         <Link href={`/offer/${item.offerId}`} className="text-sm font-semibold text-white no-underline hover:text-purple-400 transition">

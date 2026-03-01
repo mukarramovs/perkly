@@ -2,8 +2,13 @@
 
 import Link from 'next/link';
 import { Instagram, Twitter, MessageCircle, Mail, MapPin } from 'lucide-react';
+import { useTelegram } from '@/hooks/useTelegram';
 
 export function Footer() {
+    const { isTMA } = useTelegram();
+
+    if (isTMA) return null;
+
     return (
         <footer className="w-full mt-auto relative" style={{ background: 'rgba(10,10,10,0.8)', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
             {/* Ambient background glow */}

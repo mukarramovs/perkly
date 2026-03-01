@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Zap, Crown, Gem, ArrowRight, Sparkles, Shield, Clock, Gift, Star } from 'lucide-react';
+import { Check, Zap, Crown, Gem, ArrowRight, Sparkles, Shield, Clock, Gift, Star, Medal } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useAuth } from '@/lib/AuthContext';
@@ -47,7 +47,7 @@ const tiers = [
             { text: '3 бесплатных спина в день', included: true },
             { text: 'Эксклюзивные предложения', included: true },
             { text: 'Быстрая поддержка', included: true },
-            { text: '🥇 Gold бейдж профиля', included: true },
+            { text: <><span className="inline-flex items-center gap-1"><Medal className="w-4 h-4 text-yellow-500" /> Gold</span> бейдж профиля</>, included: true },
             { text: 'Ранний доступ к акциям', included: true },
             { text: 'VIP Flash Drops', included: false },
         ],
@@ -70,7 +70,7 @@ const tiers = [
             { text: '5 бесплатных спинов в день', included: true },
             { text: 'VIP Flash Drops', included: true },
             { text: 'Мгновенная поддержка 24/7', included: true },
-            { text: '💎 Platinum бейдж профиля', included: true },
+            { text: <><span className="inline-flex items-center gap-1"><Gem className="w-4 h-4 text-purple-400" /> Platinum</span> бейдж профиля</>, included: true },
             { text: 'Секретные промокоды', included: true },
             { text: 'Приоритет при покупке', included: true },
         ],

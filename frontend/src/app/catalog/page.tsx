@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, Suspense } from 'react';
-import { Search, Filter, ChevronDown, ShoppingCart, ArrowRight } from 'lucide-react';
+import { Search, Filter, ChevronDown, ShoppingCart, ArrowRight, Flame, Pizza, Tv, Gamepad2, GraduationCap, Store, Plane, Dumbbell, Package } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
@@ -10,14 +10,14 @@ import { useCart } from '@/lib/CartContext';
 
 const CATEGORIES = [
     { value: '', label: 'Все категории' },
-    { value: 'RESTAURANTS', label: '🍕 Рестораны и Кафе' },
-    { value: 'SUBSCRIPTIONS', label: '📺 Подписки' },
-    { value: 'GAMES', label: '🎮 Игры' },
-    { value: 'COURSES', label: '📚 Курсы' },
-    { value: 'MARKETPLACES', label: '🛒 Маркетплейсы' },
-    { value: 'TOURISM', label: '✈️ Туризм' },
-    { value: 'FITNESS', label: '💪 Фитнес' },
-    { value: 'OTHER', label: '📦 Другое' },
+    { value: 'RESTAURANTS', label: 'Рестораны и Кафе', icon: Pizza },
+    { value: 'SUBSCRIPTIONS', label: 'Подписки', icon: Tv },
+    { value: 'GAMES', label: 'Игры', icon: Gamepad2 },
+    { value: 'COURSES', label: 'Курсы', icon: GraduationCap },
+    { value: 'MARKETPLACES', label: 'Маркетплейсы', icon: Store },
+    { value: 'TOURISM', label: 'Туризм', icon: Plane },
+    { value: 'FITNESS', label: 'Фитнес', icon: Dumbbell },
+    { value: 'OTHER', label: 'Другое', icon: Package },
 ];
 
 const SORT_OPTIONS = [
@@ -89,9 +89,17 @@ function CatalogContent() {
             <div className="mb-8">
                 <h1 className="text-3xl md:text-4xl font-extrabold mb-2">
                     {isFlashDrop ? (
-                        <span className="text-gradient-fire">Временные Акции 🔥</span>
+                        <span className="text-gradient-fire flex items-center gap-2"><Flame className="w-8 h-8" /> Временные Акции</span>
                     ) : category ? (
-                        CATEGORIES.find(c => c.value === category)?.label || 'Каталог'
+                        <span className="flex items-center gap-2">
+                            {CATEGORIES.find(c => c.value === category)?.icon && (
+                                (() => {
+                                    const IconNode = CATEGORIES.find(c => c.value === category)?.icon as any;
+                                    return IconNode ? <IconNode className="w-8 h-8 text-purple-400" /> : null;
+                                })()
+                            )}
+                            {CATEGORIES.find(c => c.value === category)?.label || 'Каталог'}
+                        </span>
                     ) : (
                         'Каталог'
                     )}
@@ -147,7 +155,7 @@ function CatalogContent() {
                         border: `1px solid ${isFlashDrop ? 'rgba(249,115,22,0.3)' : 'rgba(255,255,255,0.06)'}`,
                     }}
                 >
-                    🔥 Flash Drops
+                    <Flame className="w-4 h-4 inline-block mr-1.5" /> Flash Drops
                 </button>
             </div>
 
@@ -172,17 +180,20 @@ function CatalogContent() {
                             <Link href={`/offer/${offer.id}`} className="no-underline text-inherit">
                                 <div className="relative h-40 overflow-hidden">
                                     <div className="w-full h-full" style={{ background: 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(59,130,246,0.15))' }}>
-                                        <div className="flex items-center justify-center h-full text-4xl opacity-50">
-                                            {offer.category === 'RESTAURANTS' ? '🍕' :
-                                                offer.category === 'SUBSCRIPTIONS' ? '📺' :
-                                                    offer.category === 'GAMES' ? '🎮' :
-                                                        offer.category === 'COURSES' ? '📚' :
-                                                            offer.category === 'FITNESS' ? '💪' : '📦'}
+                                        <div className="flex items-center justify-center h-full text-white/50">
+                                            {(() => {
+                                                const cat = CATEGORIES.find(c => c.value === offer.category);
+                                                if (cat && cat.icon) {
+                                                    const IconNode = cat.icon;
+                                                    return <IconNode className="w-12 h-12" />;
+                                                }
+                                                return <Package className="w-12 h-12" />;
+                                            })()}
                                         </div>
                                     </div>
                                     {offer.isFlashDrop && (
                                         <div className="absolute top-3 left-3 px-2 py-1 rounded-lg text-xs font-bold text-white" style={{ background: 'linear-gradient(135deg, #f97316, #ef4444)' }}>
-                                            🔥 Flash
+                                            <Flame className="w-3 h-3 inline-block" /> Flash
                                         </div>
                                     )}
                                     {offer.isExclusive && (

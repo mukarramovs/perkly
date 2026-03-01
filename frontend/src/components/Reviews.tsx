@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Star, MessageCircle, Send } from 'lucide-react';
+import { Star, MessageCircle, Send, Gem, Medal } from 'lucide-react';
 import { reviewsApi } from '@/lib/api';
 import { useAuth } from '@/lib/AuthContext';
 import Image from 'next/image';
@@ -163,8 +163,8 @@ export function Reviews({ offerId }: { offerId: string }) {
                                             <span className="font-semibold text-sm text-white/90">
                                                 {review.author.displayName || 'Аноним'}
                                             </span>
-                                            {review.author.tier === 'PLATINUM' && <span className="text-xs bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded border border-purple-500/30">💎 PRO</span>}
-                                            {review.author.tier === 'GOLD' && <span className="text-xs bg-yellow-500/20 text-yellow-300 px-1.5 py-0.5 rounded border border-yellow-500/30">🥇 Gold</span>}
+                                            {review.author.tier === 'PLATINUM' && <span className="text-xs bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded border border-purple-500/30 flex items-center gap-1 w-max"><Gem className="w-3 h-3" /> PRO</span>}
+                                            {review.author.tier === 'GOLD' && <span className="text-xs bg-yellow-500/20 text-yellow-300 px-1.5 py-0.5 rounded border border-yellow-500/30 flex items-center gap-1 w-max"><Medal className="w-3 h-3" /> Gold</span>}
                                         </div>
                                         <div className="text-xs text-white/30">
                                             {new Date(review.createdAt).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })}

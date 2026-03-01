@@ -4,50 +4,22 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
-enum Role {
-  USER
-  ADMIN
-}
-
-enum Tier {
-  SILVER
-  GOLD
-  PLATINUM
-}
-
-enum OfferCategory {
-  RESTAURANTS
-  TOURISM
-  MARKETPLACES
-  SUBSCRIPTIONS
-  GAMES
-  COURSES
-  FITNESS
-  OTHER
-}
-
-enum TransactionStatus {
-  PENDING
-  PAID
-  ACTIVATED
-  DISPUTED
-  COMPLETED
-  CANCELLED
-}
+// Enums are replaced by Strings because SQLite does not support Enum types.
 
 // User Model
 model User {
   id            String   @id @default(uuid())
   email         String   @unique
+  telegramId    String?  @unique
   passwordHash  String?
   displayName   String?
   avatarUrl     String?
-  role          Role     @default(USER)
-  tier          Tier     @default(SILVER)
+  role          String   @default("USER")
+  tier          String   @default("SILVER")
   balance       Float    @default(0.0)
   rewardPoints  Int      @default(0)
   createdAt     DateTime @default(now())
@@ -57,6 +29,7 @@ model User {
   offersAsSeller     Offer[]       @relation("SellerOffers")
   transactionsAsBuyer Transaction[] @relation("BuyerTransactions")
   reviewsWritten      Review[]     @relation("AuthorReviews")
+  messagesSent        Message[]    @relation("SenderMessages")
 }
 
 // Offer / Product Model
@@ -68,7 +41,7 @@ model Offer {
   discountPercent   Int?          @default(0)
   vendorLogo        String?
   usageInstructions String?
-  category          OfferCategory
+  category          String
   isExclusive       Boolean       @default(false) // If true, only for Gold/Platinum
   hiddenData        String        // The actual promo code, link, or credentials
   isActive          Boolean       @default(true)
@@ -89,19 +62,20 @@ model Transaction {
   offerId   String
   buyerId   String
   price     Float
-  status    TransactionStatus @default(PENDING)
+  status    String            @default("PENDING")
   createdAt DateTime          @default(now())
   updatedAt DateTime          @updatedAt
 
   offer     Offer @relation(fields: [offerId], references: [id])
   buyer     User  @relation("BuyerTransactions", fields: [buyerId], references: [id])
+  dispute   Dispute?
 }
 
 // Subscription / Tier History (Optional)
 model Subscription {
   id        String   @id @default(uuid())
   userId    String
-  tier      Tier
+  tier      String
   startDate DateTime @default(now())
   endDate   DateTime
   isActive  Boolean  @default(true)
@@ -119,4 +93,29 @@ model Review {
 
   offer  Offer @relation(fields: [offerId], references: [id])
   author User  @relation("AuthorReviews", fields: [authorId], references: [id])
+}
+
+// Dispute Model
+model Dispute {
+  id            String   @id @default(uuid())
+  transactionId String   @unique
+  reason        String
+  status        String   @default("OPEN") // OPEN, RESOLVED, CLOSED
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  messages      Message[]
+}
+
+// Chat Message Model
+model Message {
+  id        String   @id @default(uuid())
+  disputeId String
+  senderId  String
+  text      String
+  createdAt DateTime @default(now())
+
+  dispute   Dispute @relation(fields: [disputeId], references: [id])
+  sender    User    @relation("SenderMessages", fields: [senderId], references: [id])
 }

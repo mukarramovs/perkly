@@ -45,6 +45,11 @@ export const authApi = {
             method: 'POST',
             body: JSON.stringify(data),
         }),
+    telegramMiniapp: (initData: string) =>
+        request('/auth/telegram-miniapp', {
+            method: 'POST',
+            body: JSON.stringify({ initData }),
+        }),
     me: () =>
         request('/auth/me', {
             headers: {
@@ -126,3 +131,18 @@ export const usersApi = {
     getStats: () =>
         request<{ totalSpent: number; totalPurchases: number }>('/users/me/stats'),
 };
+
+const api = {
+    auth: authApi,
+    reviews: reviewsApi,
+    offers: offersApi,
+    transactions: transactionsApi,
+    users: usersApi,
+    // Add generic request methods
+    get: <T = any>(url: string) => request<T>(url),
+    post: <T = any>(url: string, body: any) => request<T>(url, { method: 'POST', body: JSON.stringify(body) }),
+    patch: <T = any>(url: string, body: any) => request<T>(url, { method: 'PATCH', body: JSON.stringify(body) }),
+    delete: <T = any>(url: string) => request<T>(url, { method: 'DELETE' }),
+};
+
+export default api;

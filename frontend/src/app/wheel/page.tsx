@@ -1,5 +1,5 @@
 import FortuneWheel from '@/components/FortuneWheel';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Coins, Tag, Coffee, Gem, Flame, Crown, RefreshCcw } from 'lucide-react';
 import Link from 'next/link';
 
 export default function WheelPage() {
@@ -38,17 +38,17 @@ export default function WheelPage() {
                 <h3 className="text-lg font-bold text-white mb-4">Возможные призы</h3>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                     {[
-                        { icon: '🪙', label: '10 Points', rarity: 'Часто' },
-                        { icon: '🏷️', label: 'Скидка 5%', rarity: 'Часто' },
-                        { icon: '🪙', label: '25 Points', rarity: 'Средне' },
-                        { icon: '☕', label: 'Бесплатный кофе', rarity: 'Редко' },
-                        { icon: '💎', label: '50 Points', rarity: 'Редко' },
-                        { icon: '🔥', label: 'Скидка 15%', rarity: 'Очень редко' },
-                        { icon: '👑', label: '100 Points', rarity: 'Легенда' },
-                        { icon: '🔄', label: 'Попробуй ещё', rarity: 'Редко' },
+                        { icon: <Coins className="w-6 h-6 text-yellow-500" />, label: '10 Points', rarity: 'Часто' },
+                        { icon: <Tag className="w-6 h-6 text-green-500" />, label: 'Скидка 5%', rarity: 'Часто' },
+                        { icon: <Coins className="w-6 h-6 text-yellow-500" />, label: '25 Points', rarity: 'Средне' },
+                        { icon: <Coffee className="w-6 h-6 text-amber-600" />, label: 'Бесплатный кофе', rarity: 'Редко' },
+                        { icon: <Gem className="w-6 h-6 text-purple-400" />, label: '50 Points', rarity: 'Редко' },
+                        { icon: <Flame className="w-6 h-6 text-orange-500" />, label: 'Скидка 15%', rarity: 'Очень редко' },
+                        { icon: <Crown className="w-6 h-6 text-yellow-400" />, label: '100 Points', rarity: 'Легенда' },
+                        { icon: <RefreshCcw className="w-6 h-6 text-slate-400" />, label: 'Попробуй ещё', rarity: 'Редко' },
                     ].map((p, i) => (
                         <div key={i} className="flex items-center gap-3 py-2 px-3 rounded-xl" style={{ background: 'rgba(255,255,255,0.02)' }}>
-                            <span className="text-2xl">{p.icon}</span>
+                            <div className="flex items-center justify-center w-8 h-8">{p.icon}</div>
                             <div>
                                 <div className="text-sm font-semibold text-white">{p.label}</div>
                                 <div className="text-xs text-white/30">{p.rarity}</div>

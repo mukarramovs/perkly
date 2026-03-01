@@ -102,7 +102,7 @@ function DockIcon({ item, isActive, onTap }: {
             href={item.href}
             className="flex flex-col items-center gap-0.5 no-underline relative select-none"
             style={{
-                transform: `scale(${scale}) translateY(${y}px)`,
+                transform: `translateY(${y}px)`,
                 willChange: 'transform',
                 WebkitTapHighlightColor: 'transparent',
             }}
@@ -112,18 +112,19 @@ function DockIcon({ item, isActive, onTap }: {
             onPointerCancel={handlePointerLeave}
         >
             <div
-                className="w-11 h-11 rounded-2xl flex items-center justify-center relative transition-colors duration-150"
+                className="w-11 h-11 flex items-center justify-center relative transition-all duration-[400ms] ease-out z-10"
                 style={{
-                    background: isActive
-                        ? 'linear-gradient(135deg, rgba(168,85,247,0.2), rgba(236,72,153,0.15))'
-                        : 'transparent',
+                    transform: `scale(${scale})`,
+                    willChange: 'transform',
                 }}
             >
                 <item.icon
                     className="w-[22px] h-[22px]"
                     style={{
-                        color: isActive ? '#c084fc' : 'rgba(255,255,255,0.35)',
-                        strokeWidth: isActive ? 2.2 : 1.8,
+                        color: isActive ? '#d4b0ff' : 'rgba(255,255,255,0.45)',
+                        strokeWidth: isActive ? 2.5 : 1.8,
+                        filter: isActive ? 'drop-shadow(0 0 8px rgba(168,85,247,0.75)) brightness(1.2)' : 'none',
+                        transition: 'color 0.4s ease-out, filter 0.4s ease-out'
                     }}
                 />
 
@@ -151,16 +152,18 @@ function DockIcon({ item, isActive, onTap }: {
             </span>
 
             {/* Active indicator dot */}
-            {isActive && (
-                <div
-                    className="absolute -bottom-1 w-1 h-1 rounded-full"
-                    style={{
-                        background: 'linear-gradient(135deg, #a855f7, #ec4899)',
-                        boxShadow: '0 0 6px rgba(168,85,247,0.6)',
-                    }}
-                />
-            )}
-        </Link>
+            {
+                isActive && (
+                    <div
+                        className="absolute -bottom-1 w-1 h-1 rounded-full"
+                        style={{
+                            background: 'linear-gradient(135deg, #a855f7, #ec4899)',
+                            boxShadow: '0 0 6px rgba(168,85,247,0.6)',
+                        }}
+                    />
+                )
+            }
+        </Link >
     );
 }
 
@@ -187,14 +190,7 @@ export function MobileDock() {
             <div className="fixed bottom-0 left-0 right-0 z-50 md:hidden flex justify-center pb-[env(safe-area-inset-bottom,8px)]">
                 {/* Outer container with blur */}
                 <div
-                    className="mx-3 mb-2 px-3 py-2 rounded-[22px] flex items-center justify-around gap-1 w-full max-w-[420px]"
-                    style={{
-                        background: 'rgba(18, 18, 20, 0.78)',
-                        backdropFilter: 'saturate(180%) blur(30px)',
-                        WebkitBackdropFilter: 'saturate(180%) blur(30px)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                        boxShadow: '0 8px 40px rgba(0,0,0,0.5), 0 0 0 0.5px rgba(255,255,255,0.05) inset',
-                    }}
+                    className="mx-3 mb-3 px-2 py-2.5 rounded-[36px] flex items-center justify-around gap-1 w-full max-w-[420px] liquid-glass-dock"
                 >
                     {dockItems.map((item) => (
                         <DockIcon
